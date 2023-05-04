@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.1 : patch - 2023-05-04
+
+"push" option patched for commit command.
+
 ## v1.0.0 - 2023-05-04
 
 ### Let's go ! 🚀
