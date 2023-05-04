@@ -1,35 +1,37 @@
 #!/usr/bin/env node
 
 const cli = require('commander')
-const { exec } = require('child_process')
+const { ExecException, exec } = require('child_process')
 const figlet = require('figlet')
-const clear = require('clear')
-
 const packageJson = require('../package.json')
 
 /**
- * Display error.
- * @param error
- * @param stdout
- * @param stderr
+ * Options for the "commit" command.
  */
-
-const displayError = (error: any, stdout: string, stderr: string) => {
-    if (error) {
-        console.error('error: ' + error.message)
-        return
-    }
-    if (stderr) {
-        console.error('stderr: ' + stderr)
-        return
-    }
-    console.log(stdout)
+interface CommitCommandOptions {
+    push?: boolean
+    tag?: string
 }
 
 /**
- * Display automatic help and version.
+ * Displays error.
+ * @param error
+ * @param stderr
  */
+const displayError = (error: typeof ExecException | null, stderr: string) => {
+    if (error) {
+        console.error(`error: ${error.message}`)
+        return
+    }
+    if (stderr) {
+        console.error(`stderr: ${stderr}`)
+        return
+    }
+}
 
+/**
+ * Displays automatic help and version.
+ */
 cli.name('go')
     .description(packageJson.description)
     .version(packageJson.version)
@@ -39,33 +41,39 @@ cli.name('go')
     .parse(process.argv)
 
 /**
- * Command to commit.
+ * Commit.
  */
-
 cli.command('commit <message>')
     .description('commits with a message')
     .option('-p, --push', 'push after commit')
     .option('-t, --tag <tag_name>', 'add a tag')
-    .action((message: string, cmdObj: any) => {
-        let command = 'git add . && git commit -m "' + message + '"'
-        if (!cmdObj.push) {
+    .action((message: string, cmd: CommitCommandOptions) => {
+        let command = `git add . && git commit -m "${message}"`
+        if (cmd.push) {
             command += ' && git push origin HEAD'
         }
-        if (cmdObj.tag) {
-            command += ' && git tag -a ' + cmdObj.tag + ' -m "' + message + '"'
-            if (!cmdObj.push) {
-                command += ' && git push origin ' + cmdObj.tag
+        if (cmd.tag) {
+            command += ` && git tag -a ${cmd.tag} -m "${message}"`
+            if (cmd.push) {
+                command += ` && git push origin ${cmd.tag}`
             }
         }
-        exec(command, (error: any, stdout: string, stderr: string) =>
-            displayError(error, stdout, stderr)
+        exec(
+            command,
+            (
+                error: typeof ExecException | null,
+                stdout: string,
+                stderr: string
+            ) => {
+                displayError(error, stderr)
+                console.log(stdout)
+            }
         )
     })
 
 /**
- * Command to pull a branch.
+ * Pull a branch.
  */
-
 cli.command('pull <branch_name>')
     .description(
         "pulls the latest changes from a specific branch and switches if it's different from the current branch"
@@ -73,36 +81,43 @@ cli.command('pull <branch_name>')
     .action((branchName: string) => {
         exec(
             'git symbolic-ref --short HEAD',
-            (error: any, stdout: string, stderr: string) => {
-                if (error) {
-                    console.error(`error: ${error.message}`)
-                    return
-                }
-                if (stderr) {
-                    console.error(`stderr: ${stderr}`)
-                    return
-                }
+            (
+                error: typeof ExecException | null,
+                stdout: string,
+                stderr: string
+            ) => {
+                displayError(error, stderr)
                 if (branchName !== stdout.trim()) {
                     exec(
                         `git checkout ${branchName}`,
-                        (error: any, stdout: string, stderr: string) => {
-                            displayError(error, stdout, stderr)
+                        (
+                            error: typeof ExecException | null,
+                            stdout: string,
+                            stderr: string
+                        ) => {
+                            displayError(error, stderr)
+                            console.log(stdout)
                         }
                     )
                 }
                 exec(
                     `git pull origin ${branchName}`,
-                    (error: any, stdout: string, stderr: string) =>
-                        displayError(error, stdout, stderr)
+                    (
+                        error: typeof ExecException | null,
+                        stdout: string,
+                        stderr: string
+                    ) => {
+                        displayError(error, stderr)
+                        console.log(stdout)
+                    }
                 )
             }
         )
     })
 
 /**
- * Display version.
+ * Displays version.
  */
-
 cli.command('version')
     .description('display the version number')
     .action(() => {
@@ -110,9 +125,8 @@ cli.command('version')
     })
 
 /**
- * Parse Argv.
+ * Parses Argv.
  */
-
 cli.parseAsync(process.argv).catch((err: string) => {
     console.error(err)
 })

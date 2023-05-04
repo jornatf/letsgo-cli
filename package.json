@@ -1,6 +1,6 @@
 {
     "name": "letsgo-cli",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Let's go commit and push in a single command line.",
     "main": "./bin/index.js",
     "scripts": {
@@ -10,6 +10,17 @@
         "compile": "npx tsc",
         "build": "npm run compile && npm run prettier"
     },
+    "keywords": [
+        "node",
+        "npm",
+        "javascript",
+        "typescript",
+        "cli",
+        "command-line",
+        "git",
+        "environment",
+        "utils"
+    ],
     "author": "Jordan Nataf <me@jordnat.dev>",
     "license": "MIT",
     "bin": {
@@ -19,7 +30,6 @@
         "bin"
     ],
     "dependencies": {
-        "clear": "^0.1.0",
         "commander": "^10.0.1",
         "figlet": "^1.6.0"
     },
