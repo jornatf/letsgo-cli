@@ -1,8 +1,12 @@
 {
     "name": "letsgo-cli",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "Let's go commit and push in a single command line.",
     "main": "./bin/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jornatf/letsgo-cli.git"
+    },
     "scripts": {
         "test": "jest",
         "prettier": "prettier --write .",
